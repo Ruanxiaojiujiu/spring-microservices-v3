@@ -1,5 +1,6 @@
 package com.in28minutes.microservices.currencyexchangeservice;
 
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -8,6 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,10 +52,11 @@ class CurrencyExchangeControllerTest {
 	}
 
 	@Test
-	void retrieveExchangeValue_unknownCurrencyPair_throwsRuntimeException() {
+	void retrieveExchangeValue_unknownCurrencyPair_throwsServletExceptionCausedByRuntimeException() {
 		when(repository.findByFromAndTo("UNKNOWN", "INR")).thenReturn(null);
 
-		org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () ->
+		ServletException thrown = assertThrows(ServletException.class, () ->
 				mockMvc.perform(get("/currency-exchange/from/UNKNOWN/to/INR")));
+		assertInstanceOf(RuntimeException.class, thrown.getCause());
 	}
 }
